@@ -14,13 +14,6 @@ import (
 	"log"
 	"net/http"
 	"connectrpc.com/connect"
-	"sync"
-	"time"
-)
-// In-memory seat map for demonstration purposes
-var (
-	seatMap   = make(map[string]*model.SeatStatus)
-	seatMapMu sync.Mutex
 )
 
 func AircraftSeatsServiceClientFactory(client *http.Client, url string) aircraftv1connect.AircraftSeatsServiceClient {
@@ -81,31 +74,45 @@ func (r *queryResolver) SeatStatus(ctx context.Context, rowNumber int32, seatLet
 
 
 func (r *subscriptionResolver) SeatStatusUpdated(ctx context.Context) (<-chan *model.SeatStatus, error) {
+    grpcClient := client.NewGRPCClient(true, AircraftSeatsServiceClientFactory)
+    reqBody := &v1.SeatStatusSubscriptionRequest{}
 
-	fmt.Println("Subscription started for seat status updates.")
-	ch := make(chan *model.SeatStatus, 1)
-	// Simulate a seat status update every 5 seconds
-	go func() {
-		defer close(ch)
-		for {
-			seatMapMu.Lock()
-			for _, seat := range seatMap {
-				ch <- seat
-			}
-			seatMapMu.Unlock()
-			// Wait for 5 seconds before sending the next update
-			select {
-			case <-ctx.Done():
-				// Exit on cancellation
-				fmt.Println("Subscription closed.")
-				return
-			case <-time.After(5 * time.Second):
-			}
-		}
-	}()
+    stream, err := grpcClient.SubscribeToSeatStatusUpdates(ctx, connect.NewRequest(reqBody))
+    if err != nil {
+        return nil, fmt.Errorf("failed to subscribe to seat status updates: %w", err)
+    }
 
-	return ch, nil
+    updates := make(chan *model.SeatStatus)
 
+    go func() {
+        defer close(updates)
+
+        for stream.Receive() {
+            msg := stream.Msg()
+            if msg == nil {
+                continue
+            }
+            select {
+            case updates <- convertToGqlModel(msg):
+            case <-ctx.Done():
+                return
+            }
+        }
+
+        if err := stream.Err(); err != nil {
+            fmt.Printf("Stream closed with error: %v\n", err)
+        }
+    }()
+
+    return updates, nil
+}
+
+func convertToGqlModel(grpcMsg *v1.SeatStatus) *model.SeatStatus {
+  	return &model.SeatStatus{
+		RowNumber:  grpcMsg.GetRowNumber(),
+		SeatLetter: grpcMsg.GetSeatLetter(),
+		Occupied:   grpcMsg.GetOccupied(),
+	}
 }
 
 // Mutation returns MutationResolver implementation.

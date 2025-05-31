@@ -13,7 +13,6 @@ import (
 	"github.com/quic-go/quic-go/http3"
 )
 
-
 type aircraftServer struct {
 	seatStatuses    map[string]*aircraftv1.SeatStatus
 	activeObservers map[string]connect.ServerStream[aircraftv1.SeatStatus]
@@ -27,9 +26,6 @@ func NewAircraftServer() *aircraftServer {
         activeObservers: make(map[string]connect.ServerStream[aircraftv1.SeatStatus]),
     }
 }
-
-
-
 
 func (s *aircraftServer) GetSeatStatus(ctx context.Context, req *connect.Request[aircraftv1.SeatStatusRequest]) (*connect.Response[aircraftv1.SeatStatusResponse], error) {
 	log.Printf("Received GetSeatStatus request: rowNumber=%d, seatLetter=%s", req.Msg.RowNumber, req.Msg.SeatLetter)
@@ -123,7 +119,6 @@ func (s *aircraftServer) generateSeatKey(rowNumber int32, seatLetter string) str
 	return fmt.Sprintf("%d-%s", rowNumber, seatLetter)
 }
 
-//for http3
 func main() {
 	mux := http.NewServeMux()
 	aircraftSvc := NewAircraftServer()
@@ -139,7 +134,4 @@ func main() {
 		log.Fatalf("error: %s", err)
 	}
 }
-
-
-
 
