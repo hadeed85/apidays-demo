@@ -7,41 +7,44 @@ package graph
 import (
 	"context"
 	"fmt"
-	"graphql-gateway/graph/model"
+	"go-graphql-gateway/client"
+	"go-graphql-gateway/graph/model"
+	"go-graphql-gateway/internal/gen/proto/example/com/aircraft/v1/aircraftv1connect"
+	v1 "go-graphql-gateway/internal/gen/proto/example/com/aircraft/v1"
+	"log"
+	"net/http"
+	"connectrpc.com/connect"
 	"sync"
 	"time"
 )
-
 // In-memory seat map for demonstration purposes
 var (
 	seatMap   = make(map[string]*model.SeatStatus)
 	seatMapMu sync.Mutex
 )
 
-func init() {
-	// Initialize seatMap with 3 specific entries for demonstration
-	seatMapMu.Lock()
-	defer seatMapMu.Unlock()
-	seatMap["1-A"] = &model.SeatStatus{RowNumber: 1, SeatLetter: "A", Occupied: false}
-	seatMap["1-B"] = &model.SeatStatus{RowNumber: 1, SeatLetter: "B", Occupied: true}
-	seatMap["2-A"] = &model.SeatStatus{RowNumber: 2, SeatLetter: "A", Occupied: false}
+func AircraftSeatsServiceClientFactory(client *http.Client, url string) aircraftv1connect.AircraftSeatsServiceClient {
+	return aircraftv1connect.NewAircraftSeatsServiceClient(client, url, connect.WithGRPC())
 }
 
 // UpdateSeatStatus is the resolver for the updateSeatStatus field.
 func (r *mutationResolver) UpdateSeatStatus(ctx context.Context, rowNumber int32, seatLetter *string, occupied bool) (*bool, error) {
-	if seatLetter == nil {
-		return nil, fmt.Errorf("seatLetter cannot be nil")
+	
+	grpcClient := client.NewGRPCClient(true, AircraftSeatsServiceClientFactory)
+	
+	var reqBody = &v1.UpdateSeatStatusRequest{RowNumber: rowNumber, SeatLetter: *seatLetter, Occupied: occupied}
+
+	resp, err := grpcClient.UpdateSeatStatus(context.Background(), connect.NewRequest(reqBody));
+	
+	if err != nil {
+		log.Fatalf("error: %s", err)
 	}
-	key := fmt.Sprintf("%d-%s", rowNumber, *seatLetter)
-	seatMapMu.Lock()
-	defer seatMapMu.Unlock()
-	seatMap[key] = &model.SeatStatus{
-		RowNumber:  rowNumber,
-		SeatLetter: *seatLetter,
-		Occupied:   occupied,
-	}
-	result := true
-	return &result, nil
+	log.Println("recv: ", resp.Msg)
+    
+	updatedStatus := resp.Msg 
+
+	return &updatedStatus.Success, nil
+	
 }
 
 // Ping is the resolver for the ping field.
@@ -52,35 +55,30 @@ func (r *queryResolver) Ping(ctx context.Context) (*string, error) {
 
 // SeatStatus is the resolver for the seatStatus field.
 func (r *queryResolver) SeatStatus(ctx context.Context, rowNumber int32, seatLetter string) (*model.SeatStatus, error) {
-	key := fmt.Sprintf("%d-%s", rowNumber, seatLetter)
-	seatMapMu.Lock()
-	defer seatMapMu.Unlock()
-	if seat, ok := seatMap[key]; ok {
-		return seat, nil
+
+	grpcClient := client.NewGRPCClient(true, AircraftSeatsServiceClientFactory)
+
+	var reqBody = &v1.SeatStatusRequest{RowNumber: rowNumber, SeatLetter: seatLetter}
+
+	resp, err := grpcClient.GetSeatStatus(context.Background(), connect.NewRequest(reqBody));
+
+	if err != nil {
+		log.Fatalf("error: %s", err)
 	}
-	// If not found, return a default unoccupied seat
+	log.Println("recv: ", resp.Msg)
+    
+	seatStatusResponse := resp.Msg 
+	
+	
 	return &model.SeatStatus{
-		RowNumber:  rowNumber,
-		SeatLetter: seatLetter,
-		Occupied:   false,
+		RowNumber:  seatStatusResponse.GetRowNumber(),
+		SeatLetter: seatStatusResponse.GetSeatLetter(),
+		Occupied:   seatStatusResponse.GetOccupied(),
 	}, nil
+	
+	
 }
 
-// SeatStatusUpdated is the resolver for the seatStatusUpdated field.
-/*
-func (r *subscriptionResolver) SeatStatusUpdated(ctx context.Context) (<-chan *model.SeatStatus, error) {
-	// For demonstration, this will just send a dummy update and close the channel.
-	ch := make(chan *model.SeatStatus, 1)
-	go func() {
-		defer close(ch)
-		ch <- &model.SeatStatus{
-			RowNumber:  1,
-			SeatLetter: "A",
-			Occupied:   true,
-		}
-	}()
-	return ch, nil
-}*/
 
 func (r *subscriptionResolver) SeatStatusUpdated(ctx context.Context) (<-chan *model.SeatStatus, error) {
 

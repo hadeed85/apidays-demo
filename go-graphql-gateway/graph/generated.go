@@ -8,7 +8,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"graphql-gateway/graph/model"
+	"go-graphql-gateway/graph/model"
 	"io"
 	"strconv"
 	"sync"
@@ -639,7 +639,7 @@ func (ec *executionContext) _Query_seatStatus(ctx context.Context, field graphql
 	}
 	res := resTmp.(*model.SeatStatus)
 	fc.Result = res
-	return ec.marshalOSeatStatus2ᚖgraphqlᚑgatewayᚋgraphᚋmodelᚐSeatStatus(ctx, field.Selections, res)
+	return ec.marshalOSeatStatus2ᚖgoᚑgraphqlᚑgatewayᚋgraphᚋmodelᚐSeatStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_seatStatus(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -970,7 +970,7 @@ func (ec *executionContext) _Subscription_seatStatusUpdated(ctx context.Context,
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalOSeatStatus2ᚖgraphqlᚑgatewayᚋgraphᚋmodelᚐSeatStatus(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalOSeatStatus2ᚖgoᚑgraphqlᚑgatewayᚋgraphᚋmodelᚐSeatStatus(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -3828,7 +3828,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOSeatStatus2ᚖgraphqlᚑgatewayᚋgraphᚋmodelᚐSeatStatus(ctx context.Context, sel ast.SelectionSet, v *model.SeatStatus) graphql.Marshaler {
+func (ec *executionContext) marshalOSeatStatus2ᚖgoᚑgraphqlᚑgatewayᚋgraphᚋmodelᚐSeatStatus(ctx context.Context, sel ast.SelectionSet, v *model.SeatStatus) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

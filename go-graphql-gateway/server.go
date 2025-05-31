@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
-	"graphql-gateway/graph"
+	"go-graphql-gateway/graph"
 	"log"
 	"net/http"
 	"time"

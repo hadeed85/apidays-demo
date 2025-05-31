@@ -11,8 +11,6 @@ import (
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	"github.com/quic-go/quic-go/http3"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 
@@ -126,40 +124,22 @@ func (s *aircraftServer) generateSeatKey(rowNumber int32, seatLetter string) str
 }
 
 //for http3
-func main1() {
-	mux := http.NewServeMux()
-	aircraftSvc := NewAircraftServer()
-    mux.Handle(aircraftv1connect.NewAircraftSeatsServiceHandler(aircraftSvc))
-
-	addr := "127.0.0.1:8980"
-	log.Printf("Starting connectrpc on %s", addr)
-	h3srv := http3.Server{
-		Addr:    addr,
-		Handler: mux,
-	}
-	if err := h3srv.ListenAndServeTLS("cert.crt", "cert.key"); err != nil {
-		log.Fatalf("error: %s", err)
-	}
-}
-
-
 func main() {
 	mux := http.NewServeMux()
 	aircraftSvc := NewAircraftServer()
     mux.Handle(aircraftv1connect.NewAircraftSeatsServiceHandler(aircraftSvc))
 
-	addr := "127.0.0.1:8980" 
+	addr := "127.0.0.1:443"
 	log.Printf("Starting connectrpc on %s", addr)
-
-
-	srv := http.Server{
+	h3srv := http3.Server{
 		Addr:    addr,
-		Handler: h2c.NewHandler(mux, &http2.Server{}),
+		Handler: mux,
 	}
-		if err := srv.ListenAndServe(); err != nil {
+	if err := h3srv.ListenAndServeTLS("_wildcard.app.lan+3.pem", "_wildcard.app.lan+3-key.pem"); err != nil {
 		log.Fatalf("error: %s", err)
 	}
-
-
 }
+
+
+
 

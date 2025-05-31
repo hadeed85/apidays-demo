@@ -1,10 +1,13 @@
-module graphql-gateway
+module go-graphql-gateway
 
 go 1.23.2
 
 require (
+	connectrpc.com/connect v1.18.1
 	github.com/99designs/gqlgen v0.17.73
+	github.com/quic-go/quic-go v0.52.0
 	github.com/vektah/gqlparser/v2 v2.5.26
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -18,7 +21,6 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/onsi/ginkgo/v2 v2.9.5 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
-	github.com/quic-go/quic-go v0.52.0 // indirect
 	github.com/rs/cors v1.11.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
