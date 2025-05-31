@@ -1,11 +1,11 @@
 # Aircraft Seats Map
 
 A React application for visualizing and interacting with aircraft seat layouts in real time.  
-This project uses **React**, **GraphQL**, and **Apollo Client** with subscriptions over **WebSocket** for live seat status updates.
+This project uses **React**, **GraphQL**, and **Apollo Client** with subscriptions over **SSE** for live seat status updates.
 
 ## Features
 
-- Real-time seat status updates using GraphQL subscriptions (WebSocket)
+- Real-time seat status updates using GraphQL subscriptions (SSE)
 - Interactive seat selection and status display
 - Modular React components
 
@@ -14,7 +14,7 @@ This project uses **React**, **GraphQL**, and **Apollo Client** with subscriptio
 - [React](https://react.dev/)
 - [Apollo Client](https://www.apollographql.com/docs/react/)
 - [GraphQL](https://graphql.org/)
-- [graphql-ws](https://github.com/enisdenjo/graphql-ws) for WebSocket subscriptions
+- [graphql-sse](https://github.com/enisdenjo/graphql-sse) for subscriptions over SSE
 
 ## Getting Started
 
@@ -27,8 +27,8 @@ This project uses **React**, **GraphQL**, and **Apollo Client** with subscriptio
 
 1. **Clone the repository:**
    ```sh
-   git clone git@github.com:antoniomaria/apidays-playground.git
-   cd aircraft-seats-websocket-ui
+   git clone git@github.com:hadeed85/apidays-demo.git
+   cd aircraft-seats-service-sse-ui
    ```
 
 2. **Install dependencies:**
@@ -41,18 +41,20 @@ This project uses **React**, **GraphQL**, and **Apollo Client** with subscriptio
 1. **Start the development server:**
    ```sh
    npm start
-   ```
-   or
-   ```sh
-   yarn start
-   ```
+   ```   
 
 2. Open your browser and go to [http://localhost:3000](http://localhost:3000).
 
 **Note:**  
-This UI expects a GraphQL backend running at `http://localhost:4000/graphql` with WebSocket support at `ws://localhost:4000/graphql`. See from the same repository the project: aircraft-seats-websocket-bff
+This UI expects a GraphQL backend running at `https://graphql-gateway.app.lan:4444/graphql`
 
 ## Project Structure
 
 - `src/components/` – React components for seats, rows, and wings
 - `src/index.js` – Apollo Client setup with HTTP and WebSocket links
+
+### Build the application
+
+   ```sh
+   npm run build
+   ```   
