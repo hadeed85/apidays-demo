@@ -124,8 +124,8 @@ func main() {
 	aircraftSvc := NewAircraftServer()
     mux.Handle(aircraftv1connect.NewAircraftSeatsServiceHandler(aircraftSvc))
 
-	addr := "127.0.0.1:443"
-	log.Printf("Starting connectrpc on %s", addr)
+	addr := "0.0.0.0:4446"
+	log.Printf("Starting grpc aircraft seat service on %s", addr)
 	h3srv := http3.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -134,4 +134,3 @@ func main() {
 		log.Fatalf("error: %s", err)
 	}
 }
-

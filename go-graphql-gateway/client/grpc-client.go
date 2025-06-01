@@ -18,6 +18,6 @@ func NewGRPCClient[T any](skipVerify bool, factory GRPCClientFactory[T]) T {
 		Transport: roundTripper,
 	}
 
-	return factory(client, "https://127.0.0.1:443")
+	return factory(client, "https://grpc-server.app.lan:4446")
 
 }

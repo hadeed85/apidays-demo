@@ -13,7 +13,9 @@ func main() {
 	// Command-line flags for address and port
 	addr := flag.String("address", "0.0.0.0", "server address")
 	port := flag.Int("port", 4445, "server port")
-	serveRoot := flag.String("www", "/Users/antonio.sanchez/git/apidays-playground/go-http3-fileserver/html", "Root of path to serve under https://127.0.0.1/files/")
+	serveRoot := flag.String("www", "./html", "Root of path to serve under https://127.0.0.1/files/")
+	certFile := flag.String("cert", "_wildcard.app.lan+3.pem", "TLS certificate file")
+    keyFile := flag.String("key", "_wildcard.app.lan+3-key.pem", "TLS key file")
 	
 	flag.Parse()
 
@@ -29,10 +31,10 @@ func main() {
 	mux.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir(*serveRoot))))
 	
 	// TLS configuration with proper ALPN
-	tlsCertFile := "./_wildcard.app.lan+3.pem"
-	tlsKeyFile := "./_wildcard.app.lan+3-key.pem"
+	tlsCertFile := certFile
+	tlsKeyFile := keyFile
 
-	cert, err := tls.LoadX509KeyPair(tlsCertFile, tlsKeyFile)
+	cert, err := tls.LoadX509KeyPair(*tlsCertFile, *tlsKeyFile)
 	if err != nil {
 		log.Fatalf("failed to load TLS certificate: %v", err)
 	}
