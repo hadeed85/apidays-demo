@@ -1,0 +1,5 @@
+go 1.23.2
+
+use ./aircraft-seats-service-go 
+use ./go-graphql-gateway
+use ./go-http3-fileserver
